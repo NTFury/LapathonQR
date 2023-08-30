@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lapathon QR Scanner</title>
+    <style>
+        #scanner {
+            position: relative;
+        }
+        #overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 10px;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lapathon QR Scanner</h1>
+    
+    <div id="scanner">
+        <video id="video"></video>
+        <div id="overlay">Last Scanned: <span id="lastScanned"></span></div>
+    </div>
+    
+    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+    <script>
+        // Request camera access and display the feed in the video element
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const videoElement = document.getElementById("video");
+                videoElement.srcObject = stream;
+
+                // Initialize the QR code scanner
+                const scanner = new Instascan.Scanner({ video: videoElement });
+                scanner.addListener('scan', function(content) {
+                    document.getElementById("lastScanned").textContent = content;
+                });
+                Instascan.Camera.getCameras().then(function(cameras) {
+                    if (cameras.length > 0) {
+                        scanner.start(cameras[0]);
+                    } else {
+                        console.error('No cameras found.');
+                    }
+                });
+            } catch (error) {
+                console.error("Error accessing camera:", error);
+            }
+        }
+
+        // Start the camera and scanner when the page loads
+        window.onload = startCamera;
+    </script>
+</body>
+</html>
